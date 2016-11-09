@@ -9,10 +9,10 @@ FlowNetwork::FlowNetwork(int vertices_quentity, int edges_quentity, int source_n
 	height_.resize(vertices_quentity_);
 	excess_flow_.resize(vertices_quentity_);
 	for (int i = 0; i < vertices_quentity_; ++i) {
-		excess_flow_[i] = 0;
 		edges_[i].resize(vertices_quentity_);
 		for (int j = 0; j < vertices_quentity_; ++j) {
 			edges_[i][j].existing_ = false;
+			edges_[i][j].capacity_ = 0;
 		}
 	}
 }
@@ -52,6 +52,25 @@ void FlowNetwork::Relabel(int vertex) {
 		}
 		if (height_[vertex] >= min_neihbour_height) {
 			height_[vertex] = min_neihbour_height + 1;
+		}
+	}
+}
+
+void FlowNetwork::InitializePreflow() {
+	for (int i = 0; i < vertices_quentity_; ++i) {
+		height_[i] = 0;
+		excess_flow_[i] = 0;
+		for (int j = 0; j < vertices_quentity_; ++j) {
+			edges_[i][j].flow_ = 0;
+		}
+	}
+	height_[source_number_] = edges_quentity_;
+	for (int i = 0; i < edges_quentity_; ++i) {
+		if (edges_[source_number_][i].existing_) {
+			edges_[source_number_][i].flow_ = edges_[source_number_][i].capacity_;
+			edges_[i][source_number_].flow_ = - edges_[source_number_][i].capacity_;
+			excess_flow_[i] = edges_[source_number_][i].capacity_;
+			excess_flow_[source_number_] -= edges_[source_number_][i].capacity_;
 		}
 	}
 }

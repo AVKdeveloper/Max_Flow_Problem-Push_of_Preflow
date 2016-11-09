@@ -22,7 +22,8 @@ public:
 	FlowNetwork(int vertices_quentity, int edges_quentity, int source_number, int target_number);
 	void AddEdge(int from, int to, int capacity);
 	void Push(int from, int to); // push of flow
-	void Relabel(int vertex); 
+	void Relabel(int vertex);
+	void InitializePreflow();
 };
 
 
