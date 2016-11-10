@@ -33,7 +33,8 @@ void FlowNetwork::AddEdge(const int& from, const int& to, const int& capacity) {
 }
 
 bool FlowNetwork::Push(const int& from, const int& to) {
-	if (excess_flow_[from] > 0 && edges_[from][to].existing_ && height_[from] == height_[to] + 1) {
+	if (excess_flow_[from] > 0 && edges_[from][to].existing_ && height_[from] == height_[to] + 1 &&
+		edges_[from][to].capacity_ - edges_[from][to].flow_ > 0) {
 		int delta_of_pushing = std::min(excess_flow_[from], edges_[from][to].capacity_ - edges_[from][to].flow_);
 		excess_flow_[from] -= delta_of_pushing;
 		excess_flow_[to] += delta_of_pushing;
@@ -49,7 +50,8 @@ bool FlowNetwork::Relabel(const int& vertex) {
 	if (vertex != source_number_ && vertex != target_number_ && excess_flow_[vertex] > 0) {
 		int min_neihbour_height = 2 * height_[vertex];// there are theorem that for every vertex height[vertex] < 2V-2
 		for (int i = 0; i < vertices_quentity_; ++i) {
-			if (edges_[vertex][i].existing_ && min_neihbour_height > height_[i]) {
+			if (edges_[vertex][i].existing_ && edges_[vertex][i].capacity_ - edges_[vertex][i].flow_ > 0 &&
+				min_neihbour_height > height_[i]) {
 				min_neihbour_height = height_[i];
 			}
 		}
@@ -59,7 +61,8 @@ bool FlowNetwork::Relabel(const int& vertex) {
 		} else {
 			return false;
 		}
-
+	} else {
+		return false;
 	}
 }
 
@@ -71,8 +74,8 @@ void FlowNetwork::InitializePreflow() {
 			edges_[i][j].flow_ = 0;
 		}
 	}
-	height_[source_number_] = edges_quentity_;
-	for (int i = 0; i < edges_quentity_; ++i) {
+	height_[source_number_] = vertices_quentity_;
+	for (int i = 0; i < vertices_quentity_; ++i) {
 		if (edges_[source_number_][i].existing_) {
 			edges_[source_number_][i].flow_ = edges_[source_number_][i].capacity_;
 			edges_[i][source_number_].flow_ = - edges_[source_number_][i].capacity_;
@@ -100,7 +103,7 @@ void FlowNetwork::PushRelabelOfPreflow() {
 
 int FlowNetwork::FindMaxFlow() {
 	PushRelabelOfPreflow();
-	if (excess_flow_[source_number_] == excess_flow_[target_number_]) {
+	if (excess_flow_[source_number_] == -excess_flow_[target_number_]) {
 		return excess_flow_[target_number_];
 	} else {
 		return -1;
