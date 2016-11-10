@@ -1,6 +1,6 @@
 // This program finds max flow in undirected graph
-//
-//
+// We use Push & Relable of preflow algorithm
+// O(V^2 * E)
 
 #include <iostream>
 #include "flow_network.h"
