@@ -1,6 +1,7 @@
 #include "flow_network.h"
 
-FlowNetwork::FlowNetwork(int vertices_quentity, int edges_quentity, int source_number, int target_number) {
+FlowNetwork::FlowNetwork(const int& vertices_quentity, const int& edges_quentity, 
+	                     const int& source_number, const int& target_number) {
 	vertices_quentity_ = vertices_quentity;
 	edges_quentity_ = edges_quentity;
 	source_number_ = source_number;
@@ -17,7 +18,7 @@ FlowNetwork::FlowNetwork(int vertices_quentity, int edges_quentity, int source_n
 	}
 }
 
-void FlowNetwork::AddEdge(int from, int to, int capacity) {
+void FlowNetwork::AddEdge(const int& from, const int& to, const int& capacity) {
 	if (!edges_[from][to].existing_) {
 		edges_[from][to].existing_ = true;
 		edges_[from][to].capacity_ = capacity;
@@ -31,28 +32,34 @@ void FlowNetwork::AddEdge(int from, int to, int capacity) {
 	}
 }
 
-void FlowNetwork::Push(int from, int to) {
+bool FlowNetwork::Push(const int& from, const int& to) {
 	if (excess_flow_[from] > 0 && edges_[from][to].existing_ && height_[from] == height_[to] + 1) {
 		int delta_of_pushing = std::min(excess_flow_[from], edges_[from][to].capacity_ - edges_[from][to].flow_);
 		excess_flow_[from] -= delta_of_pushing;
 		excess_flow_[to] += delta_of_pushing;
 		edges_[from][to].flow_ += delta_of_pushing;
 		edges_[to][from].flow_ -= delta_of_pushing;
+		return true;
+	} else {
+		return false;
 	}
 } 
 
-void FlowNetwork::Relabel(int vertex) {
-	if (excess_flow_[vertex] > 0) {
-		int min_neihbour_height = height_[vertex];
+bool FlowNetwork::Relabel(const int& vertex) {
+	if (vertex != source_number_ && vertex != target_number_ && excess_flow_[vertex] > 0) {
+		int min_neihbour_height = 2 * height_[vertex];// there are theorem that for every vertex height[vertex] < 2V-2
 		for (int i = 0; i < vertices_quentity_; ++i) {
 			if (edges_[vertex][i].existing_ && min_neihbour_height > height_[i]) {
 				min_neihbour_height = height_[i];
-				break;
 			}
 		}
-		if (height_[vertex] >= min_neihbour_height) {
+		if (height_[vertex] <= min_neihbour_height) {
 			height_[vertex] = min_neihbour_height + 1;
+			return true;
+		} else {
+			return false;
 		}
+
 	}
 }
 
@@ -72,5 +79,30 @@ void FlowNetwork::InitializePreflow() {
 			excess_flow_[i] = edges_[source_number_][i].capacity_;
 			excess_flow_[source_number_] -= edges_[source_number_][i].capacity_;
 		}
+	}
+}
+
+void FlowNetwork::PushRelabelOfPreflow() {
+	InitializePreflow();
+	bool done_operations = true;// indicator that we have done at least one operation
+	while (done_operations) { // estimation: ~E times
+		done_operations = false;
+		for (int i = 0; i < vertices_quentity_; ++i) {// O(V)
+			if (excess_flow_[i] > 0) {
+				done_operations |= Relabel(i); // O(V)
+				for (int j = 0; j < vertices_quentity_; ++j) { // O(V)
+					done_operations |= Push(i, j);
+				}
+			}
+		}
+	}
+}
+
+int FlowNetwork::FindMaxFlow() {
+	PushRelabelOfPreflow();
+	if (excess_flow_[source_number_] == excess_flow_[target_number_]) {
+		return excess_flow_[target_number_];
+	} else {
+		return -1;
 	}
 }

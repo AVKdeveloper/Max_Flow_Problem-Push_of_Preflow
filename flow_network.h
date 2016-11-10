@@ -19,11 +19,13 @@ class FlowNetwork {
 	std::vector<int> excess_flow_;
 	std::vector<int> height_;
 public:
-	FlowNetwork(int vertices_quentity, int edges_quentity, int source_number, int target_number);
-	void AddEdge(int from, int to, int capacity);
-	void Push(int from, int to); // push of flow
-	void Relabel(int vertex);
+	FlowNetwork(const int& vertices_quentity, const int& edges_quentity, const int& source_number, const int& target_number);
+	void AddEdge(const int& from, const int& to, const int& capacity);
+	bool Push(const int& from, const int& to); // push of flow
+	bool Relabel(const int& vertex);
 	void InitializePreflow();
+	void PushRelabelOfPreflow();
+	int FindMaxFlow();
 };
 
 

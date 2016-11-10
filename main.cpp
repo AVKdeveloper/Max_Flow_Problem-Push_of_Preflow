@@ -25,7 +25,7 @@ int main() {
 			std::cin >> from_number >> to_number >> capacity;
 			net.AddEdge(from_number, to_number, capacity);
 		}
-
+		std::cout >> net.FindMaxFlow();
 	}
 	
 
